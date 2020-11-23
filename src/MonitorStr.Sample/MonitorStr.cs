@@ -106,4 +106,13 @@ namespace MonitorStr.Sample
         }
 
     }
+    public class UtcTimeUtil
+    {
+        private UtcTimeUtil() { }
+        private static readonly long UtcStartTicks = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc).Ticks;
+        public static long CurrentTimeMillis()
+        {
+            return (DateTime.UtcNow.Ticks - UtcStartTicks) / 10000;
+        }
+    }
 }
