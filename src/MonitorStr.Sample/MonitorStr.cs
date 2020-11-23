@@ -26,10 +26,21 @@ namespace MonitorStr.Sample
                 _lockers[i] = new object();
             }
         }
+        /// <summary>
+        /// get locker with index
+        /// </summary>
+        /// <param name="key"></param>
+        /// <returns></returns>
         private static int GetIndex(string key)
         {
             return Math.Abs(key.GetHashCode() % _concurrentCount);
         }
+        /// <summary>
+        /// same key has same index lock same object,
+        /// </summary>
+        /// <param name="key"></param>
+        /// <param name="timeoutMillis"></param>
+        /// <returns>get this lock</returns>
         public static bool TryEnter(string key, int timeoutMillis)
         {
             if (string.IsNullOrWhiteSpace(key))
@@ -51,16 +62,21 @@ namespace MonitorStr.Sample
                 entry.Decrement();
             return acquired;
         }
-
+        /// <summary>
+        /// exit this key use in finally
+        /// </summary>
+        /// <param name="key"></param>
         public static void Exit(string key)
         {
             var entry = _lockDics[key];
             Monitor.Exit(entry);
+            //double check that second check lock key's object
             if (entry.Decrement() == 0)
             {
                 var locker = _lockers[GetIndex(key)];
                 lock (locker)
                 {
+                    //safe check need remove
                     if (entry.CanRemove())
                     {
                         _lockDics.TryRemove(key, out var v);
